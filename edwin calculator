@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edwin Calculator</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #10131c;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.app {
+  width: 340px;
+  max-width: 95vw;
+  padding: 18px;
+  border-radius: 20px;
+  background: #1b2030;
+  box-shadow: 0 15px 50px #0007;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.top h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+#codeBtn {
+  border: 1px solid #5865f2;
+  color: #c2c7ff;
+  background: #292e49;
+  padding: 9px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+#display {
+  width: 100%;
+  height: 75px;
+  border: none;
+  outline: none;
+  border-radius: 12px;
+  background: #111522;
+  color: white;
+  text-align: right;
+  padding: 15px;
+  font-size: 30px;
+  margin-bottom: 14px;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+}
+
+.key {
+  height: 55px;
+  border: none;
+  border-radius: 12px;
+  background: #30374a;
+  color: white;
+  font-size: 19px;
+  cursor: pointer;
+}
+
+.key:hover { filter: brightness(1.2); }
+.op { background: #414bd0; }
+.equal { background: #6875ff; }
+.clear { background: #743c50; }
+
+#codePanel {
+  display: none;
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #0c1019;
+}
+
+#codePanel p {
+  color: #aab3c8;
+  font-size: 12px;
+}
+
+#codeText {
+  color: #8de5b1;
+  font-size: 12px;
+}
+
+#status {
+  color: #aab3c8;
+  font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="top">
+    <h2>Edwin Calculator</h2>
+    <button id="codeBtn" onclick="toggleCode()">
+      &lt;/&gt; Code Mode
+    </button>
+  </div>
+
+  <input id="display" value="0" readonly
+         aria-label="Pantalla de la calculadora">
+
+  <div class="keys">
+    <button class="key clear" onclick="clearDisplay()">AC</button>
+    <button class="key" onclick="backspace()">⌫</button>
+    <button class="key op" onclick="add('/')">÷</button>
+    <button class="key op" onclick="add('*')">×</button>
+
+    <button class="key" onclick="add('7')">7</button>
+    <button class="key" onclick="add('8')">8</button>
+    <button class="key" onclick="add('9')">9</button>
+    <button class="key op" onclick="add('-')">−</button>
+
+    <button class="key" onclick="add('4')">4</button>
+    <button class="key" onclick="add('5')">5</button>
+    <button class="key" onclick="add('6')">6</button>
+    <button class="key op" onclick="add('+')">+</button>
+
+    <button class="key" onclick="add('1')">1</button>
+    <button class="key" onclick="add('2')">2</button>
+    <button class="key" onclick="add('3')">3</button>
+    <button class="key equal" onclick="calculate()">=</button>
+
+    <button class="key" onclick="add('0')">0</button>
+    <button class="key" onclick="add('00')">00</button>
+    <button class="key" onclick="add('.')">.</button>
+    <button class="key clear" onclick="clearDisplay()">C</button>
+  </div>
+
+  <div id="codePanel">
+    <strong>Code Mode activado</strong>
+    <p>Introduce el código secreto en la calculadora.</p>
+    <div id="codeText">Código: ____</div>
+    <div id="status"></div>
+  </div>
+
+</div>
+
+<script>
+const display = document.getElementById("display");
+const codePanel = document.getElementById("codePanel");
+const codeBtn = document.getElementById("codeBtn");
+const codeText = document.getElementById("codeText");
+const statusText = document.getElementById("status");
+
+let expression = "";
+let codeMode = false;
+let secretCode = "";
+
+function toggleCode() {
+  codeMode = !codeMode;
+
+  codePanel.style.display = codeMode ? "block" : "none";
+  codeBtn.textContent = codeMode
+    ? "✕ Hide Code"
+    : "</> Code Mode";
+
+  secretCode = "";
+  statusText.textContent = "";
+
+  if (codeMode) {
+    expression = "";
+    display.value = "0";
+    codeText.textContent = "Código: ____";
+  }
+}
+
+function add(value) {
+  if (codeMode) {
+    if (/^\d+$/.test(value)) {
+      secretCode += value;
+      secretCode = secretCode.slice(-4);
+
+      codeText.textContent =
+        "Código: " + secretCode.padStart(4, "_");
+
+      if (secretCode === "2222") {
+        codeText.textContent = "Código correcto.";
+        statusText.textContent = "Abriendo GN-Math...";
+
+        window.location.href = "https://gn-math.dev/";
+      }
+    } else {
+      secretCode = "";
+      codeText.textContent = "Código: ____";
+      statusText.textContent = "Introduce solamente números.";
+    }
+
+    return;
+  }
+
+  if (display.value === "Error") expression = "";
+
+  expression += value;
+  display.value = expression || "0";
+}
+
+function clearDisplay() {
+  expression = "";
+  display.value = "0";
+
+  if (codeMode) {
+    secretCode = "";
+    codeText.textContent = "Código: ____";
+    statusText.textContent = "";
+  }
+}
+
+function backspace() {
+  if (codeMode) {
+    secretCode = secretCode.slice(0, -1);
+    codeText.textContent =
+      "Código: " + secretCode.padStart(4, "_");
+    return;
+  }
+
+  expression = expression.slice(0, -1);
+  display.value = expression || "0";
+}
+
+function calculate() {
+  if (codeMode || !expression) return;
+
+  if (!/^[0-9+\-*/.() ]+$/.test(expression)) {
+    display.value = "Error";
+    expression = "";
+    return;
+  }
+
+  try {
+    const result = Function(
+      '"use strict"; return (' + expression + ')'
+    )();
+
+    if (!Number.isFinite(result)) throw new Error();
+
+    expression = String(
+      Math.round((result + Number.EPSILON) * 1e10) / 1e10
+    );
+
+    display.value = expression;
+  } catch {
+    display.value = "Error";
+    expression = "";
+  }
+}
+</script>
+
+</body>
+</html>
